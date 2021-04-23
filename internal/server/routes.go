@@ -12,7 +12,7 @@ import (
 
 func (s *server) routes() {
 	s.router.HandleFunc("/api", s.handleAPI())
-	s.router.HandleFunc("/", s.middlewareExample(s.handleTelegram()))
+	s.router.HandleFunc("/telegram", s.handleTelegram())
 }
 
 func (s *server) handleAPI() http.HandlerFunc {
