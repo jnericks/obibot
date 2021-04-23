@@ -41,7 +41,7 @@ func (m ChartMeta) PriceChantPercent() float64 {
 }
 
 func (m ChartMeta) PriceSummary() string {
-	return fmt.Sprintf("%s %.2f %.2f (%.2f%%)", m.Symbol, m.RegularMarketPrice, m.PriceChangeAmount(), m.PriceChantPercent()*100)
+	return fmt.Sprintf("%s: %.2f %+.2f (%+.2f%%)", m.Symbol, m.RegularMarketPrice, m.PriceChangeAmount(), m.PriceChantPercent()*100)
 }
 
 type TimePeriod struct {
