@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/jnericks/obibot/internal/clients/rapid"
+	"github.com/jnericks/obibot/internal/clients/iex"
 	"github.com/jnericks/obibot/internal/clients/telegram"
 	"github.com/jnericks/obibot/internal/server"
 	log "github.com/sirupsen/logrus"
@@ -19,8 +19,7 @@ func main() {
 func run() error {
 	var (
 		telegramBotToken = os.Getenv("TELEGRAM_BOT_TOKEN")
-		rapidAPIKey      = os.Getenv("RAPID_API_KEY")
-		rapidAPIHost     = "apidojo-yahoo-finance-v1.p.rapidapi.com"
+		iexAPIToken      = os.Getenv("IEX_API_TOKEN")
 	)
 
 	httpClient := http.DefaultClient
@@ -30,14 +29,14 @@ func run() error {
 		return err
 	}
 
-	rapidClient, err := rapid.NewClient(httpClient, rapidAPIKey, rapidAPIHost)
+	iexClient, err := iex.NewClient(httpClient, "https://cloud.iexapis.com/stable", iexAPIToken)
 	if err != nil {
 		return err
 	}
 
 	s, err := server.NewServer(server.Config{}, server.Dependencies{
 		Telegram: telegramClient,
-		Rapid:    rapidClient,
+		IEX:      iexClient,
 	})
 	if err != nil {
 		return err

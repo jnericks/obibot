@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/go-playground/validator"
-	"github.com/jnericks/obibot/internal/clients/rapid"
+	"github.com/jnericks/obibot/internal/clients/iex"
 	"github.com/jnericks/obibot/internal/clients/telegram"
 	"github.com/jnericks/obibot/internal/commands"
 )
@@ -13,7 +13,7 @@ type Config struct{}
 
 type Dependencies struct {
 	Telegram telegram.Client `validate:"required"`
-	Rapid    rapid.Client    `validate:"required"`
+	IEX      iex.Client      `validate:"required"`
 }
 
 type server struct {
@@ -21,7 +21,7 @@ type server struct {
 	manager commands.Manager
 
 	telegram telegram.Client
-	rapid    rapid.Client
+	iex      iex.Client
 }
 
 func NewServer(config Config, deps Dependencies) (http.Handler, error) {
@@ -37,8 +37,8 @@ func NewServer(config Config, deps Dependencies) (http.Handler, error) {
 		router:  http.ServeMux{},
 		manager: commands.NewManager(),
 
-		rapid:    deps.Rapid,
 		telegram: deps.Telegram,
+		iex:      deps.IEX,
 	}
 	s.routes()
 	if err := s.commands(); err != nil {
