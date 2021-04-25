@@ -3,10 +3,19 @@ package server
 import "github.com/jnericks/obibot/internal/commands"
 
 func (s *server) commands() error {
-	if err := s.manager.Register("!s", commands.GetStockQuote(s.iex)); err != nil {
+	getStockQuote := commands.GetStockQuote(s.iex)
+	if err := s.manager.Register("/s", getStockQuote); err != nil {
 		return err
 	}
-	if err := s.manager.Register("!c", commands.GetCryptoPrice(s.iex)); err != nil {
+	if err := s.manager.Register("!s", getStockQuote); err != nil {
+		return err
+	}
+
+	getCryptoPrice := commands.GetCryptoPrice(s.iex)
+	if err := s.manager.Register("/c", getCryptoPrice); err != nil {
+		return err
+	}
+	if err := s.manager.Register("!c", getCryptoPrice); err != nil {
 		return err
 	}
 
