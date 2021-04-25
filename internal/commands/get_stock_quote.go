@@ -17,6 +17,11 @@ func GetStockQuote(iexClient iex.Client) Func {
 			Symbol: input.Args[0],
 		})
 		if err != nil {
+			if ierr, ok := err.(iex.ErrInvalidSymbol); ok {
+				return Output{
+					Response: ierr.Error(),
+				}, nil
+			}
 			return Output{}, err
 		}
 
