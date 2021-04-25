@@ -3,6 +3,7 @@ package iex
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 )
@@ -46,10 +47,16 @@ func (c *client) GetCryptoPrice(ctx context.Context, params GetCryptoPriceParams
 		return nil, fmt.Errorf("executing iex get crypto response: %w", err)
 	}
 
-	var out GetCryptoPriceResponse
-	if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
-		return nil, fmt.Errorf("decoding iex get crypto response: %w", err)
+	switch resp.StatusCode {
+	case http.StatusNotFound:
+		return nil, ErrInvalidSymbol{Symbol: params.Symbol}
+	case http.StatusOK:
+		var out GetCryptoPriceResponse
+		if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
+			return nil, fmt.Errorf("decoding iex get crypto response: %w", err)
+		}
+		return &out, nil
+	default: // unknown error
+		return nil, errors.New("getting crypto price")
 	}
-
-	return &out, nil
 }

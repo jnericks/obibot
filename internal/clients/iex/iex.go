@@ -9,6 +9,14 @@ import (
 	"github.com/go-playground/validator"
 )
 
+type ErrInvalidSymbol struct {
+	Symbol string
+}
+
+func (e ErrInvalidSymbol) Error() string {
+	return fmt.Sprintf("symbol '%s' not found", e.Symbol)
+}
+
 type Client interface {
 	GetStockQuote(context.Context, GetStockQuoteParams) (*GetStockQuoteResponse, error)
 	GetCryptoPrice(context.Context, GetCryptoPriceParams) (*GetCryptoPriceResponse, error)

@@ -3,6 +3,7 @@ package iex
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 )
@@ -58,10 +59,17 @@ func (c *client) GetStockQuote(ctx context.Context, params GetStockQuoteParams) 
 		return nil, fmt.Errorf("executing iex get quote response: %w", err)
 	}
 
-	var out GetStockQuoteResponse
-	if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
-		return nil, fmt.Errorf("decoding iex get quote response: %w", err)
-	}
+	switch resp.StatusCode {
+	case http.StatusNotFound:
+		return nil, ErrInvalidSymbol{Symbol: params.Symbol}
+	case http.StatusOK:
+		var out GetStockQuoteResponse
+		if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
+			return nil, fmt.Errorf("decoding iex get quote response: %w", err)
+		}
 
-	return &out, nil
+		return &out, nil
+	default: // unknown error
+		return nil, errors.New("getting stock quote")
+	}
 }
