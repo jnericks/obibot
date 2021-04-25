@@ -8,13 +8,13 @@ import (
 	"net/http"
 )
 
-type GetStockQuoteParams struct {
+type GetStockParams struct {
 	Symbol string `validate:"required"`
 }
 
-// GetStockQuoteResponse is the iex quote api response.
+// GetStockResponse is the iex quote api response.
 // https://iexcloud.io/docs/api/#quote
-type GetStockQuoteResponse struct {
+type GetStockResponse struct {
 	// Symbol refers to the stock ticker.
 	Symbol string `json:"symbol"`
 
@@ -36,7 +36,7 @@ type GetStockQuoteResponse struct {
 	ChangePercent float64 `json:"changePercent"`
 }
 
-func (r GetStockQuoteResponse) PriceSummary() string {
+func (r GetStockResponse) PriceSummary() string {
 	return fmt.Sprintf("%s: %.2f %+.2f (%+.2f%%)", r.Symbol, r.LatestPrice, r.Change, r.ChangePercent*100)
 }
 
@@ -44,7 +44,7 @@ func (c *client) urlGetQuote(symbol string) string {
 	return fmt.Sprintf("%s/stock/%s/quote", c.baseURL, symbol)
 }
 
-func (c *client) GetStockQuote(ctx context.Context, params GetStockQuoteParams) (*GetStockQuoteResponse, error) {
+func (c *client) GetStock(ctx context.Context, params GetStockParams) (*GetStockResponse, error) {
 	if err := c.validate.Struct(params); err != nil {
 		return nil, fmt.Errorf("validating get quote params: %w", err)
 	}
@@ -63,7 +63,7 @@ func (c *client) GetStockQuote(ctx context.Context, params GetStockQuoteParams) 
 	case http.StatusNotFound:
 		return nil, ErrInvalidSymbol{Symbol: params.Symbol}
 	case http.StatusOK:
-		var out GetStockQuoteResponse
+		var out GetStockResponse
 		if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
 			return nil, fmt.Errorf("decoding iex get quote response: %w", err)
 		}

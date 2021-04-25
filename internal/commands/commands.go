@@ -14,7 +14,7 @@ type Output struct {
 	Response string
 }
 
-type Func func(context.Context, Input) (Output, error)
+type Func func(context.Context, Input) (*Output, error)
 
 var ErrAlreadyRegistered = errors.New("command already registered in manager")
 
@@ -28,7 +28,7 @@ func (e ErrNotSupported) Error() string {
 
 type Manager interface {
 	Register(string, Func) error
-	Exec(context.Context, string, Input) (Output, error)
+	Exec(context.Context, string, Input) (*Output, error)
 }
 
 func NewManager() Manager {
@@ -49,10 +49,10 @@ func (m *manager) Register(cmd string, fn Func) error {
 	return nil
 }
 
-func (m *manager) Exec(ctx context.Context, cmd string, input Input) (Output, error) {
+func (m *manager) Exec(ctx context.Context, cmd string, input Input) (*Output, error) {
 	fn, exists := m.registry[cmd]
 	if !exists {
-		return Output{}, ErrNotSupported{Command: cmd}
+		return nil, ErrNotSupported{Command: cmd}
 	}
 	return fn(ctx, input)
 }

@@ -7,25 +7,25 @@ import (
 	"github.com/jnericks/obibot/internal/clients/iex"
 )
 
-func GetStockQuote(iexClient iex.Client) Func {
-	return func(ctx context.Context, input Input) (Output, error) {
+func GetStock(iexClient iex.Client) Func {
+	return func(ctx context.Context, input Input) (*Output, error) {
 		if len(input.Args) < 1 {
-			return Output{}, errors.New("expecting symbol as input")
+			return nil, errors.New("expecting stock symbol as input")
 		}
 
-		resp, err := iexClient.GetStockQuote(ctx, iex.GetStockQuoteParams{
+		resp, err := iexClient.GetStock(ctx, iex.GetStockParams{
 			Symbol: input.Args[0],
 		})
 		if err != nil {
 			if ierr, ok := err.(iex.ErrInvalidSymbol); ok {
-				return Output{
+				return &Output{
 					Response: ierr.Error(),
 				}, nil
 			}
-			return Output{}, err
+			return nil, err
 		}
 
-		return Output{
+		return &Output{
 			Response: resp.PriceSummary(),
 		}, nil
 	}

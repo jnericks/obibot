@@ -7,25 +7,25 @@ import (
 	"github.com/jnericks/obibot/internal/clients/iex"
 )
 
-func GetCryptoPrice(iexClient iex.Client) Func {
-	return func(ctx context.Context, input Input) (Output, error) {
+func GetCrypto(iexClient iex.Client) Func {
+	return func(ctx context.Context, input Input) (*Output, error) {
 		if len(input.Args) < 1 {
-			return Output{}, errors.New("expecting symbol as input")
+			return nil, errors.New("expecting crypto symbol as input")
 		}
 
-		resp, err := iexClient.GetCryptoPrice(ctx, iex.GetCryptoPriceParams{
+		resp, err := iexClient.GetCrypto(ctx, iex.GetCryptoParams{
 			Symbol: input.Args[0],
 		})
 		if err != nil {
 			if ierr, ok := err.(iex.ErrInvalidSymbol); ok {
-				return Output{
+				return &Output{
 					Response: ierr.Error(),
 				}, nil
 			}
-			return Output{}, err
+			return nil, err
 		}
 
-		return Output{
+		return &Output{
 			Response: resp.PriceSummary(),
 		}, nil
 	}
