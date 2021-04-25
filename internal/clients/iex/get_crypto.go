@@ -47,7 +47,7 @@ func (r GetCryptoResponse) PriceSummary() string {
 	}
 
 	change := latest - previous
-	changePercent := change / previous
+	changePercent := change / previous * 100
 
 	return fmt.Sprintf("%s %+.2f (%+.2f%%)", out, change, changePercent)
 }
