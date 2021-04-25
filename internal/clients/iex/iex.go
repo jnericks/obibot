@@ -1,31 +1,56 @@
 package iex
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+	"net/http"
+	"net/url"
 
-// QuoteResponse is the iex quote api response.
-// https://iexcloud.io/docs/api/#quote
-type QuoteResponse struct {
-	// Symbol refers to the stock ticker.
-	Symbol string `json:"symbol"`
+	"github.com/go-playground/validator"
+)
 
-	// CompanyName refers to the company name.
-	CompanyName string `json:"companyName"`
-
-	// PreviousClose refers to the previous trading day closing price.
-	PreviousClose float64 `json:"previousClose"`
-
-	// LatestPrice refers to the latest relevant price of the security which is derived from multiple sources.
-	LatestPrice float64 `json:"latestPrice"`
-
-	// Change refers to the change in price between LatestPrice and PreviousClose.
-	Change float64 `json:"change"`
-
-	// ChangePercent refers to the percent change in price between LatestPrice and PreviousClose.
-	//
-	// For example, a 5% change would be represented as 0.05.
-	ChangePercent float64 `json:"changePercent"`
+type Client interface {
+	GetStockQuote(context.Context, GetStockQuoteParams) (*GetStockQuoteResponse, error)
+	GetCryptoPrice(context.Context, GetCryptoPriceParams) (*GetCryptoPriceResponse, error)
 }
 
-func (r QuoteResponse) PriceSummary() string {
-	return fmt.Sprintf("%s: %.2f %+.2f (%+.2f%%)", r.Symbol, r.LatestPrice, r.Change, r.ChangePercent*100)
+type client struct {
+	baseURL  string
+	apiToken string
+	validate *validator.Validate
+	http     *http.Client
+}
+
+func (c *client) newRequest(ctx context.Context, method, url string) (*http.Request, error) {
+	req, err := http.NewRequest(method, url, nil)
+	if err != nil {
+		return nil, err
+	}
+	q := req.URL.Query()
+	q.Set("token", c.apiToken)
+	req.URL.RawQuery = q.Encode()
+	return req.WithContext(ctx), nil
+}
+
+func NewClient(httpClient *http.Client, baseURL, apiToken string) (Client, error) {
+	validate := validator.New()
+	if err := validate.Struct(struct {
+		APIToken string `validate:"required"`
+	}{
+		APIToken: apiToken,
+	}); err != nil {
+		return nil, err
+	}
+
+	u, err := url.Parse(baseURL)
+	if err != nil {
+		return nil, fmt.Errorf("could not parse base url: %w", err)
+	}
+
+	return &client{
+		baseURL:  u.String(),
+		apiToken: apiToken,
+		validate: validate,
+		http:     httpClient,
+	}, nil
 }

@@ -7,13 +7,13 @@ import (
 	"github.com/jnericks/obibot/internal/clients/iex"
 )
 
-func GetSymbolQuote(iexClient iex.Client) Func {
+func GetStockQuote(iexClient iex.Client) Func {
 	return func(ctx context.Context, input Input) (Output, error) {
 		if len(input.Args) < 1 {
 			return Output{}, errors.New("expecting symbol as input")
 		}
 
-		resp, err := iexClient.GetQuote(ctx, iex.GetQuoteParams{
+		resp, err := iexClient.GetStockQuote(ctx, iex.GetStockQuoteParams{
 			Symbol: input.Args[0],
 		})
 		if err != nil {
