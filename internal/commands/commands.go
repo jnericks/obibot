@@ -12,6 +12,7 @@ type Input struct {
 
 type Output struct {
 	Response string
+	Markdown bool
 }
 
 type Func func(context.Context, Input) (*Output, error)

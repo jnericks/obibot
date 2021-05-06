@@ -20,9 +20,6 @@ func (s *server) handleAPI() http.HandlerFunc {
 		Command string `json:"command"`
 		Args    string `json:"args"`
 	}
-	type Response struct {
-		Message string `json:"message"`
-	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		var data Request
 		if err := s.decode(w, r, &data); err != nil {
@@ -34,12 +31,19 @@ func (s *server) handleAPI() http.HandlerFunc {
 		out, err := s.manager.Exec(r.Context(), data.Command, commands.Input{
 			Args: strings.Split(data.Args, " "),
 		})
-		if err != nil {
+		if err != nil || out == nil {
 			log.WithError(err).Warn()
 			s.respond(w, r, nil, http.StatusBadRequest)
 		}
 
-		s.respond(w, r, Response{Message: out.Response}, http.StatusOK)
+		params := telegram.SendMessageParams{
+			ChatID: 1,
+			Text:   out.Response,
+		}
+		if out.Markdown {
+			params.ParseMode = "MarkdownV2"
+		}
+		s.respond(w, r, params, http.StatusOK)
 	}
 }
 
@@ -69,10 +73,14 @@ func (s *server) handleTelegram() http.HandlerFunc {
 			return
 		}
 
-		if err := s.telegram.SendMessage(r.Context(), telegram.SendMessageParams{
+		params := telegram.SendMessageParams{
 			ChatID: data.Message.Chat.ID,
 			Text:   out.Response,
-		}); err != nil {
+		}
+		if out.Markdown {
+			params.ParseMode = "MarkdownV2"
+		}
+		if err := s.telegram.SendMessage(r.Context(), params); err != nil {
 			log.WithError(err).Error("sending telegram message")
 			s.respond(w, r, nil, http.StatusInternalServerError)
 			return

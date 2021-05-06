@@ -34,6 +34,9 @@ type GetStockResponse struct {
 	//
 	// For example, a 5% change would be represented as 0.05.
 	ChangePercent float64 `json:"changePercent"`
+
+	// For US stocks, indicates if the market is in normal market hours. Will be false during extended hours trading.
+	IsUSMarketOpen bool `json:"isUSMarketOpen"`
 }
 
 func (r GetStockResponse) PriceSummary() string {

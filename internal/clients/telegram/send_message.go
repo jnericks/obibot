@@ -7,8 +7,9 @@ import (
 )
 
 type SendMessageParams struct {
-	ChatID int64  `validate:"required" json:"chat_id"`
-	Text   string `validate:"required" json:"text"`
+	ChatID    int64  `json:"chat_id" validate:"required"`
+	Text      string `json:"text" validate:"required"`
+	ParseMode string `json:"parse_mode,omitempty" validate:"oneof=MarkdownV2"`
 }
 
 func (c *client) SendMessage(ctx context.Context, params SendMessageParams) error {
