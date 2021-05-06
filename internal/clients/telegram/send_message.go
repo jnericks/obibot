@@ -3,6 +3,7 @@ package telegram
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/jnericks/obibot/internal/log"
@@ -38,7 +39,16 @@ func (c *client) SendMessage(ctx context.Context, params SendMessageParams) erro
 		return err
 	}
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("sendMessage failed: %d %s", resp.StatusCode, http.StatusText(resp.StatusCode))
+		status := fmt.Sprintf("%d %s", resp.StatusCode, http.StatusText(resp.StatusCode))
+		if b, err := ioutil.ReadAll(resp.Body); err != nil {
+			log.WithError(ctx, err).WithField("status", status).Warn("sendMessage failed")
+		} else {
+			log.WithFields(ctx, log.Fields{
+				"status": status,
+				"body":   string(b),
+			}).Warn("sendMessage failed")
+		}
+		return fmt.Errorf("sendMessage failed: %s", status)
 	}
 
 	return nil

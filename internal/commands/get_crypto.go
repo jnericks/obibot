@@ -50,7 +50,7 @@ func formatPrice(v float64) string {
 }
 
 func formatPercent(v float64) string {
-	return fmt.Sprintf("%.2f%%", v)
+	return fmt.Sprintf("%+.2f%%", v)
 }
 
 func FormatCryptoAsFlat(data []cmc.Cryptocurrency) (*Output, error) {
