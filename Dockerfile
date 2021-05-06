@@ -6,6 +6,7 @@ ADD . /app
 WORKDIR /app
 
 RUN go mod download
+RUN go test ./...
 RUN go build ./cmd/obibot
 
 CMD ["/app/obibot"]
