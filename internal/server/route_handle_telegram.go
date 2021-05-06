@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -33,7 +34,7 @@ func (s *server) handleTelegram() http.HandlerFunc {
 		}
 
 		log.WithFields(ctx, log.Fields{
-			"data":    data,
+			"data":    fmt.Sprintf("%+v", data),
 			"command": cmd,
 			"input":   cmdInput,
 		}).Info("handling telegram request")
