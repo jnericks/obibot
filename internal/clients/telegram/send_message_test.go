@@ -3,6 +3,8 @@ package telegram_test
 import (
 	"context"
 	"net/http"
+	"os"
+	"strconv"
 	"testing"
 
 	"github.com/go-playground/validator"
@@ -10,6 +12,27 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func TestSendActualMessage(t *testing.T) {
+	t.SkipNow()
+	token := os.Getenv("TELEGRAM_BOT_TOKEN")
+	require.NotEmpty(t, token)
+
+	chatID := os.Getenv("TELEGRAM_TEST_CHAT_ID")
+	require.NotEmpty(t, chatID)
+	cid, err := strconv.Atoi(chatID)
+	require.NoError(t, err)
+
+	c, err := telegram.NewClient(http.DefaultClient, token)
+	require.NoError(t, err)
+
+	err = c.SendMessage(context.Background(), telegram.SendMessageParams{
+		ChatID:    int64(cid),
+		Text:      "hello",
+		ParseMode: "",
+	})
+	require.NoError(t, err)
+}
 
 func TestSendMessageParamValidation(t *testing.T) {
 	validParams := func() telegram.SendMessageParams {
