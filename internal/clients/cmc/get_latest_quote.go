@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"sort"
-
-	"github.com/sirupsen/logrus"
 )
 
 type (
@@ -29,8 +27,6 @@ func (c *client) GetLatestQuote(ctx context.Context, params GetLatestQuoteParams
 	if err != nil {
 		return nil, fmt.Errorf("creating cmc get latest quote request: %w", err)
 	}
-
-	logrus.Info(req.URL.String())
 
 	resp, err := c.http.Do(req)
 	if err != nil {

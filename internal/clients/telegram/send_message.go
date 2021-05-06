@@ -4,6 +4,12 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+
+	"github.com/jnericks/obibot/internal/log"
+)
+
+const (
+	ParseModeMarkdown = "MarkdownV2"
 )
 
 type SendMessageParams struct {
@@ -13,11 +19,12 @@ type SendMessageParams struct {
 }
 
 func (c *client) SendMessage(ctx context.Context, params SendMessageParams) error {
+	log.WithField(ctx, "chatId", params.ChatID).Info("sending message")
 	if err := c.validate.Struct(params); err != nil {
 		return err
 	}
 
-	req, err := c.newRequest(ctx, http.MethodPost, c.url()+endpointSendMessage, params)
+	req, err := c.newRequest(ctx, http.MethodPost, c.url("sendMessage"), params)
 	if err != nil {
 		return err
 	}

@@ -7,12 +7,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/go-playground/validator"
-)
-
-const (
-	endpointSendMessage = "/sendMessage"
 )
 
 type Client interface {
@@ -42,8 +39,11 @@ type client struct {
 	http     *http.Client
 }
 
-func (c *client) url() string {
-	return fmt.Sprintf("https://api.telegram.org/bot%s", c.botToken)
+func (c *client) url(path string) string {
+	for strings.HasPrefix(path, "/") {
+		path = path[1:]
+	}
+	return fmt.Sprintf("https://api.telegram.org/bot%s/%s", c.botToken, path)
 }
 
 func (c *client) newRequest(ctx context.Context, method, url string, data interface{}) (*http.Request, error) {

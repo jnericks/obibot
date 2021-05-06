@@ -2,7 +2,6 @@ package commands
 
 import (
 	"context"
-	"errors"
 	"fmt"
 )
 
@@ -17,18 +16,9 @@ type Output struct {
 
 type Func func(context.Context, Input) (*Output, error)
 
-var ErrAlreadyRegistered = errors.New("command already registered in manager")
-
-type ErrNotSupported struct {
-	Command string
-}
-
-func (e ErrNotSupported) Error() string {
-	return fmt.Sprintf("command '%s' not supported", e.Command)
-}
-
 type Manager interface {
 	Register(string, Func) error
+	CanExec(string) bool
 	Exec(context.Context, string, Input) (*Output, error)
 }
 
@@ -44,16 +34,21 @@ type manager struct {
 
 func (m *manager) Register(cmd string, fn Func) error {
 	if _, exists := m.registry[cmd]; exists {
-		return ErrAlreadyRegistered
+		return fmt.Errorf("command '%s' already registered", cmd)
 	}
 	m.registry[cmd] = fn
 	return nil
 }
 
+func (m *manager) CanExec(cmd string) bool {
+	_, registered := m.registry[cmd]
+	return registered
+}
+
 func (m *manager) Exec(ctx context.Context, cmd string, input Input) (*Output, error) {
-	fn, exists := m.registry[cmd]
-	if !exists {
-		return nil, ErrNotSupported{Command: cmd}
+	fn, registered := m.registry[cmd]
+	if !registered {
+		return nil, fmt.Errorf("command '%s' not supported", cmd)
 	}
 	return fn(ctx, input)
 }

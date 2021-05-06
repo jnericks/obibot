@@ -7,13 +7,13 @@ import (
 	"github.com/jnericks/obibot/internal/clients/cmc"
 	"github.com/jnericks/obibot/internal/clients/iex"
 	"github.com/jnericks/obibot/internal/clients/telegram"
+	"github.com/jnericks/obibot/internal/log"
 	"github.com/jnericks/obibot/internal/server"
-	log "github.com/sirupsen/logrus"
 )
 
 func main() {
 	if err := run(); err != nil {
-		log.WithError(err).Fatal()
+		log.Fatal(err)
 	}
 }
 

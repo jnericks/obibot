@@ -19,7 +19,6 @@ func (e ErrInvalidSymbol) Error() string {
 
 type Client interface {
 	GetStock(context.Context, GetStockParams) (*GetStockResponse, error)
-	GetCrypto(context.Context, GetCryptoParams) (*GetCryptoResponse, error)
 }
 
 type client struct {

@@ -1,11 +1,15 @@
 package server
 
-import "net/http"
+import (
+	"net/http"
 
-func (s *server) middlewareExample(fn http.HandlerFunc) http.HandlerFunc {
+	"github.com/jnericks/obibot/internal/log"
+)
+
+func (s *server) middlewareInjectTraceID(fn http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// do pre handler things
-		fn(w, r)
-		// do post handler things
+		ctx := r.Context()
+		ctx = log.WithTraceID(ctx)
+		fn(w, r.WithContext(ctx))
 	}
 }

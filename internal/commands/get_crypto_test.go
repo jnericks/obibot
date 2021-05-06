@@ -82,35 +82,44 @@ var (
 	}
 )
 
-func TestGetCrypto(t *testing.T) {
-	cmdFunc := commands.GetCrypto(&stubCMCClient{
-		getLatestQuote: func(ctx context.Context, params cmc.GetLatestQuoteParams) (*cmc.GetLatestQuoteResponse, error) {
-			assert.ElementsMatch(t, []string{"BTC", "DOGE", "ETH"}, params.Symbols)
-			return &cmc.GetLatestQuoteResponse{
-				Data: []cmc.Cryptocurrency{
-					cryptoBTC,
-					cryptoETH,
-					cryptoDOGE,
-				},
-			}, nil
-		},
+func TestFormatCryptoAsFlat(t *testing.T) {
+	a, err := commands.FormatCryptoAsFlat([]cmc.Cryptocurrency{
+		cryptoBTC,
+		cryptoETH,
+		cryptoDOGE,
 	})
-
-	output, err := cmdFunc(context.Background(), commands.Input{
-		Args: []string{"btc,eth", "doge"},
-	})
-
 	require.NoError(t, err)
-	e := "```" + `
-+-----------------+----------+--------+---------+----------+
-|                 |    PRICE |     1H |     24H |       7D |
-+-----------------+----------+--------+---------+----------+
-| Bitcoin (BTC)   | 57200.27 | -0.04% |  +6.75% |   +4.49% |
-| Ethereum (ETH)  |  3519.28 | +0.59% |  +8.37% |  +28.55% |
-| Dogecoin (DOGE) |   0.6480 | +1.46% | +19.33% | +102.52% |
-+-----------------+----------+--------+---------+----------+
-` + "```"
 
-	assert.Equal(t, e, output.Response)
-	assert.True(t, output.Markdown)
+	e := &commands.Output{
+		Response: `BTC: $57,200.27 (-0.04%, 6.75%, 4.49%)
+ETH: $3,519.28 (0.59%, 8.37%, 28.55%)
+DOGE: $0.6480 (1.46%, 19.33%, 102.52%)`,
+		Markdown: false,
+	}
+
+	assert.Equal(t, e, a)
+}
+
+func TestFormatCryptoAsMarkdownTable(t *testing.T) {
+	a, err := commands.FormatCryptoAsMarkdownTable([]cmc.Cryptocurrency{
+		cryptoBTC,
+		cryptoETH,
+		cryptoDOGE,
+	})
+	require.NoError(t, err)
+
+	e := &commands.Output{
+		Response: "```" + `
++-----------------+------------+--------+--------+---------+
+|                 |      PRICE |     1H |    24H |      7D |
++-----------------+------------+--------+--------+---------+
+| Bitcoin (BTC)   | $57,200.27 | -0.04% |  6.75% |   4.49% |
+| Ethereum (ETH)  |  $3,519.28 |  0.59% |  8.37% |  28.55% |
+| Dogecoin (DOGE) |    $0.6480 |  1.46% | 19.33% | 102.52% |
++-----------------+------------+--------+--------+---------+
+` + "```",
+		Markdown: true,
+	}
+
+	assert.Equal(t, e, a)
 }
