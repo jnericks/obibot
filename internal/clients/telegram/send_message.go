@@ -14,7 +14,7 @@ const (
 )
 
 type SendMessageParams struct {
-	ChatID    int64  `json:"chat_id" validate:"gt=1"`
+	ChatID    int64  `json:"chat_id" validate:"required"`
 	Text      string `json:"text" validate:"required"`
 	ParseMode string `json:"parse_mode,omitempty" validate:"omitempty,oneof=MarkdownV2"`
 }

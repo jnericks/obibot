@@ -56,13 +56,6 @@ func TestSendMessageParamValidation(t *testing.T) {
 			},
 		},
 		{
-			title: "ChatID is Negative",
-			field: "ChatID",
-			scenario: func(params *telegram.SendMessageParams) {
-				params.ChatID = -1
-			},
-		},
-		{
 			title: "Text is empty",
 			field: "Text",
 			scenario: func(params *telegram.SendMessageParams) {
