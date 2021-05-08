@@ -38,3 +38,11 @@ type Quote struct {
 	MarketCap        float64   `json:"market_cap"`
 	LastUpdated      time.Time `json:"last_updated"`
 }
+
+type Status struct {
+	Timestamp    time.Time `json:"timestamp"`
+	ErrorCode    int       `json:"error_code"`
+	ErrorMessage string    `json:"error_message"`
+	Elapsed      int       `json:"elapsed"`
+	CreditCount  int       `json:"credit_count"`
+}

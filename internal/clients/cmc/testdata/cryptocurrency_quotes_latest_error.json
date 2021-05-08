@@ -1,0 +1,10 @@
+{
+    "status": {
+        "timestamp": "2021-05-08T01:11:30.280Z",
+        "error_code": 400,
+        "error_message": "Invalid value for \"symbol\": \"YOOO\"",
+        "elapsed": 0,
+        "credit_count": 0,
+        "notice": null
+    }
+}

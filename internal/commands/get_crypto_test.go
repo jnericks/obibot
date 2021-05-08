@@ -83,10 +83,13 @@ var (
 )
 
 func TestFormatCryptoAsFlat(t *testing.T) {
-	a, err := commands.FormatCryptoAsFlat([]cmc.Cryptocurrency{
-		cryptoBTC,
-		cryptoETH,
-		cryptoDOGE,
+	a, err := commands.FormatCryptoAsFlat(&cmc.GetLatestQuoteResponse{
+		Data: []cmc.Cryptocurrency{
+			cryptoBTC,
+			cryptoETH,
+			cryptoDOGE,
+		},
+		Error: "",
 	})
 	require.NoError(t, err)
 
@@ -101,10 +104,13 @@ DOGE: $0.6480 (+1.46%, +19.33%, +102.52%)`,
 }
 
 func TestFormatCryptoAsMarkdownTable(t *testing.T) {
-	a, err := commands.FormatCryptoAsMarkdownTable([]cmc.Cryptocurrency{
-		cryptoBTC,
-		cryptoETH,
-		cryptoDOGE,
+	a, err := commands.FormatCryptoAsMarkdownTable(&cmc.GetLatestQuoteResponse{
+		Data: []cmc.Cryptocurrency{
+			cryptoBTC,
+			cryptoETH,
+			cryptoDOGE,
+		},
+		Error: "",
 	})
 	require.NoError(t, err)
 

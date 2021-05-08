@@ -12,7 +12,7 @@ import (
 	"github.com/olekukonko/tablewriter"
 )
 
-func GetCrypto(cmcClient cmc.Client, formatter func([]cmc.Cryptocurrency) (*Output, error)) Func {
+func GetCrypto(cmcClient cmc.Client, formatter func(*cmc.GetLatestQuoteResponse) (*Output, error)) Func {
 	return func(ctx context.Context, input Input) (*Output, error) {
 		if len(input.Args) < 1 {
 			return nil, errors.New("expecting crypto symbol as input")
@@ -38,7 +38,7 @@ func GetCrypto(cmcClient cmc.Client, formatter func([]cmc.Cryptocurrency) (*Outp
 			return nil, fmt.Errorf("no data for symbols %v", symbols)
 		}
 
-		return formatter(resp.Data)
+		return formatter(resp)
 	}
 }
 
@@ -53,9 +53,19 @@ func formatPercent(v float64) string {
 	return fmt.Sprintf("%+.2f%%", v)
 }
 
-func FormatCryptoAsFlat(data []cmc.Cryptocurrency) (*Output, error) {
+func FormatCryptoAsFlat(resp *cmc.GetLatestQuoteResponse) (*Output, error) {
+	if resp == nil {
+		return nil, errors.New("server error")
+	}
+	if resp.Error != "" {
+		return &Output{
+			Response: resp.Error,
+			Markdown: false,
+		}, nil
+	}
+
 	var sb strings.Builder
-	for i, c := range data {
+	for i, c := range resp.Data {
 		if i > 0 {
 			sb.WriteByte('\n')
 		}
@@ -75,7 +85,17 @@ func FormatCryptoAsFlat(data []cmc.Cryptocurrency) (*Output, error) {
 	}, nil
 }
 
-func FormatCryptoAsMarkdownTable(data []cmc.Cryptocurrency) (*Output, error) {
+func FormatCryptoAsMarkdownTable(resp *cmc.GetLatestQuoteResponse) (*Output, error) {
+	if resp == nil {
+		return nil, errors.New("server error")
+	}
+	if resp.Error != "" {
+		return &Output{
+			Response: resp.Error,
+			Markdown: false,
+		}, nil
+	}
+
 	var buf bytes.Buffer
 	t := tablewriter.NewWriter(&buf)
 
@@ -89,7 +109,7 @@ func FormatCryptoAsMarkdownTable(data []cmc.Cryptocurrency) (*Output, error) {
 		tablewriter.ALIGN_RIGHT,
 		tablewriter.ALIGN_RIGHT,
 	})
-	for _, c := range data {
+	for _, c := range resp.Data {
 		q := c.Quote.USD
 		t.Append([]string{
 			fmt.Sprintf("%s (%s)", c.Name, c.Symbol),

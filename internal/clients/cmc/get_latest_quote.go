@@ -14,7 +14,8 @@ type (
 	}
 
 	GetLatestQuoteResponse struct {
-		Data []Cryptocurrency `json:"data"`
+		Data  []Cryptocurrency
+		Error string
 	}
 )
 
@@ -38,7 +39,8 @@ func (c *client) GetLatestQuote(ctx context.Context, params GetLatestQuoteParams
 	}
 
 	var data struct {
-		Data map[string]Cryptocurrency `json:"data"`
+		Data   map[string]Cryptocurrency `json:"data"`
+		Status Status                    `json:"status"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 		return nil, fmt.Errorf("decoding cmc get latest quote response: %w", err)
@@ -52,5 +54,8 @@ func (c *client) GetLatestQuote(ctx context.Context, params GetLatestQuoteParams
 	sort.Slice(cryptos, func(i, j int) bool {
 		return cryptos[i].Rank < cryptos[j].Rank
 	})
-	return &GetLatestQuoteResponse{Data: cryptos}, nil
+	return &GetLatestQuoteResponse{
+		Data:  cryptos,
+		Error: data.Status.ErrorMessage,
+	}, nil
 }
