@@ -34,7 +34,17 @@ func GetCrypto(cmcClient cmc.Client, formatter func(*cmc.GetLatestQuoteResponse)
 		if err != nil {
 			return nil, err
 		}
-		if resp == nil || len(resp.Data) == 0 {
+
+		if resp == nil {
+			return nil, errors.New("server error")
+		}
+		if resp.Error != "" {
+			return &Output{
+				Response: resp.Error,
+				Markdown: false,
+			}, nil
+		}
+		if len(resp.Data) == 0 {
 			return nil, fmt.Errorf("no data for symbols %v", symbols)
 		}
 
@@ -54,16 +64,6 @@ func formatPercent(v float64) string {
 }
 
 func FormatCryptoAsFlat(resp *cmc.GetLatestQuoteResponse) (*Output, error) {
-	if resp == nil {
-		return nil, errors.New("server error")
-	}
-	if resp.Error != "" {
-		return &Output{
-			Response: resp.Error,
-			Markdown: false,
-		}, nil
-	}
-
 	var sb strings.Builder
 	for i, c := range resp.Data {
 		if i > 0 {
@@ -86,16 +86,6 @@ func FormatCryptoAsFlat(resp *cmc.GetLatestQuoteResponse) (*Output, error) {
 }
 
 func FormatCryptoAsMarkdownTable(resp *cmc.GetLatestQuoteResponse) (*Output, error) {
-	if resp == nil {
-		return nil, errors.New("server error")
-	}
-	if resp.Error != "" {
-		return &Output{
-			Response: resp.Error,
-			Markdown: false,
-		}, nil
-	}
-
 	var buf bytes.Buffer
 	t := tablewriter.NewWriter(&buf)
 
