@@ -45,7 +45,7 @@ func (s *server) handleTelegram() http.HandlerFunc {
 				"command": cmd,
 				"input":   cmdInput,
 			}).Warn()
-			s.respond(w, r, nil, http.StatusBadRequest)
+			s.respond(w, r, nil, http.StatusOK)
 			return
 		}
 
