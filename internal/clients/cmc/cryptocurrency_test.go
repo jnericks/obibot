@@ -15,15 +15,14 @@ import (
 //go:embed testdata/cryptocurrency_quotes_latest.json
 var cryptocurrencyQuotesLatest []byte
 
-//go:embed testdata/cryptocurrency_quotes_latest_error.json
-var cryptocurrencyQuotesLatestError []byte
+//go:embed testdata/cryptocurrency_quotes_latest_bad_request.json
+var cryptocurrencyQuotesLatestBadRequest []byte
 
 func TestCryptocurrency(t *testing.T) {
 	const apiKey = "fake-apiKey"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, r.URL.Path, "/cryptocurrency/quotes/latest")
-
 		assert.Equal(t, apiKey, r.Header.Get("X-CMC_PRO_API_KEY"))
 
 		_, err := w.Write(cryptocurrencyQuotesLatest)
@@ -42,15 +41,15 @@ func TestCryptocurrency(t *testing.T) {
 	assert.Empty(t, resp.Error)
 }
 
-func TestCryptocurrencyError(t *testing.T) {
+func TestCryptocurrencyBadRequest(t *testing.T) {
 	const apiKey = "fake-apiKey"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, r.URL.Path, "/cryptocurrency/quotes/latest")
-
 		assert.Equal(t, apiKey, r.Header.Get("X-CMC_PRO_API_KEY"))
 
-		_, err := w.Write(cryptocurrencyQuotesLatestError)
+		w.WriteHeader(http.StatusBadRequest)
+		_, err := w.Write(cryptocurrencyQuotesLatestBadRequest)
 		require.NoError(t, err)
 	}))
 

@@ -34,28 +34,47 @@ func (c *client) GetLatestQuote(ctx context.Context, params GetLatestQuoteParams
 		return nil, fmt.Errorf("executing cmc get latest quote response: %w", err)
 	}
 
-	if resp.StatusCode != http.StatusOK {
+	switch resp.StatusCode {
+	case http.StatusBadRequest:
+		var data struct {
+			Status Status `json:"status"`
+		}
+		if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
+			return nil, fmt.Errorf("decoding cmc get latest quote response: %w", err)
+		}
+
+		errMsg := data.Status.ErrorMessage
+		if errMsg == "" {
+			errMsg = fmt.Sprintf("error retrieving crypto data for %v", params.Symbols)
+		}
+
+		return &GetLatestQuoteResponse{
+			Data:  nil,
+			Error: errMsg,
+		}, nil
+
+	case http.StatusOK:
+		var data struct {
+			Data map[string]Cryptocurrency `json:"data"`
+		}
+		if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
+			return nil, fmt.Errorf("decoding cmc get latest quote response: %w", err)
+		}
+
+		cryptos := make([]Cryptocurrency, 0, len(data.Data))
+		for _, c := range data.Data {
+			cryptos = append(cryptos, c)
+		}
+
+		sort.Slice(cryptos, func(i, j int) bool {
+			return cryptos[i].Rank < cryptos[j].Rank
+		})
+		return &GetLatestQuoteResponse{
+			Data:  cryptos,
+			Error: "",
+		}, nil
+
+	default:
 		return nil, fmt.Errorf("cmc get latest quote response (%d %s)", resp.StatusCode, http.StatusText(resp.StatusCode))
 	}
-
-	var data struct {
-		Data   map[string]Cryptocurrency `json:"data"`
-		Status Status                    `json:"status"`
-	}
-	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
-		return nil, fmt.Errorf("decoding cmc get latest quote response: %w", err)
-	}
-
-	cryptos := make([]Cryptocurrency, 0, len(data.Data))
-	for _, c := range data.Data {
-		cryptos = append(cryptos, c)
-	}
-
-	sort.Slice(cryptos, func(i, j int) bool {
-		return cryptos[i].Rank < cryptos[j].Rank
-	})
-	return &GetLatestQuoteResponse{
-		Data:  cryptos,
-		Error: data.Status.ErrorMessage,
-	}, nil
 }
