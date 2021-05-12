@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -9,7 +8,6 @@ import (
 
 	"github.com/dustin/go-humanize"
 	"github.com/jnericks/obibot/internal/clients/cmc"
-	"github.com/olekukonko/tablewriter"
 )
 
 func GetCrypto(cmcClient cmc.Client, formatter func(*cmc.GetLatestQuoteResponse) (*Output, error)) Func {
@@ -52,66 +50,40 @@ func GetCrypto(cmcClient cmc.Client, formatter func(*cmc.GetLatestQuoteResponse)
 	}
 }
 
-func formatPrice(v float64) string {
-	if v < 10 {
-		return "$" + humanize.FormatFloat("#,###.####", v)
-	}
-	return "$" + humanize.FormatFloat("#,###.##", v)
-}
-
-func formatPercent(v float64) string {
-	return fmt.Sprintf("%+.2f%%", v)
-}
-
 func FormatCryptoAsFlat(resp *cmc.GetLatestQuoteResponse) (*Output, error) {
 	var sb strings.Builder
 	for i, c := range resp.Data {
 		if i > 0 {
 			sb.WriteByte('\n')
 		}
-		q := c.Quote.USD
-		sb.WriteString(fmt.Sprintf("%s: %s (%s, %s, %s)",
+
+		price := c.Quote.USD.Price
+		percentChange := c.Quote.USD.PercentChange24H
+		change := price / (1 + percentChange)
+		format := "#,###.##"
+		if -10 < price && price < 10 {
+			format = "#,###.####"
+		}
+
+		sPrice := "$" + humanize.FormatFloat(format, price)
+		sPercentChange := fmt.Sprintf("%+.2f%%", percentChange)
+		sChange := humanize.FormatFloat(format, change)
+		if change < 0 {
+			sChange = "-$" + sChange
+		} else {
+			sChange = "+$" + sChange
+		}
+
+		sb.WriteString(fmt.Sprintf("%s: %s %s (%s)",
 			c.Symbol,
-			formatPrice(q.Price),
-			formatPercent(q.PercentChange1H),
-			formatPercent(q.PercentChange24H),
-			formatPercent(q.PercentChange7D),
+			sPrice,
+			sChange,
+			sPercentChange,
 		))
 	}
 
 	return &Output{
 		Response: sb.String(),
 		Markdown: false,
-	}, nil
-}
-
-func FormatCryptoAsMarkdownTable(resp *cmc.GetLatestQuoteResponse) (*Output, error) {
-	var buf bytes.Buffer
-	t := tablewriter.NewWriter(&buf)
-
-	t.SetHeaderAlignment(tablewriter.ALIGN_RIGHT)
-	t.SetHeader([]string{"", "Price", "1h", "24h", "7d"})
-
-	t.SetColumnAlignment([]int{
-		tablewriter.ALIGN_LEFT,
-		tablewriter.ALIGN_RIGHT,
-		tablewriter.ALIGN_RIGHT,
-		tablewriter.ALIGN_RIGHT,
-		tablewriter.ALIGN_RIGHT,
-	})
-	for _, c := range resp.Data {
-		q := c.Quote.USD
-		t.Append([]string{
-			fmt.Sprintf("%s (%s)", c.Name, c.Symbol),
-			formatPrice(q.Price),
-			formatPercent(q.PercentChange1H),
-			formatPercent(q.PercentChange24H),
-			formatPercent(q.PercentChange7D),
-		})
-	}
-	t.Render()
-	return &Output{
-		Response: "```\n" + buf.String() + "```",
-		Markdown: true,
 	}, nil
 }

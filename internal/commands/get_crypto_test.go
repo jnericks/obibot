@@ -1,8 +1,6 @@
 package commands_test
 
 import (
-	"context"
-	"sync"
 	"testing"
 
 	"github.com/jnericks/obibot/internal/clients/cmc"
@@ -10,20 +8,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
-
-type stubCMCClient struct {
-	getLatestQuoteMtx sync.Mutex
-	getLatestQuote    func(context.Context, cmc.GetLatestQuoteParams) (*cmc.GetLatestQuoteResponse, error)
-}
-
-func (s *stubCMCClient) GetLatestQuote(ctx context.Context, params cmc.GetLatestQuoteParams) (*cmc.GetLatestQuoteResponse, error) {
-	s.getLatestQuoteMtx.Lock()
-	defer s.getLatestQuoteMtx.Unlock()
-	if s.getLatestQuote == nil {
-		return nil, nil
-	}
-	return s.getLatestQuote(ctx, params)
-}
 
 var (
 	cryptoBTC = cmc.Cryptocurrency{
@@ -94,37 +78,10 @@ func TestFormatCryptoAsFlat(t *testing.T) {
 	require.NoError(t, err)
 
 	e := &commands.Output{
-		Response: `BTC: $57,200.27 (-0.04%, +6.75%, +4.49%)
-ETH: $3,519.28 (+0.59%, +8.37%, +28.55%)
-DOGE: $0.6480 (+1.46%, +19.33%, +102.52%)`,
+		Response: `BTC: $57,200.27 +$7,385.28 (+6.75%)
+ETH: $3,519.28 +$375.66 (+8.37%)
+DOGE: $0.6480 +$0.0319 (+19.33%)`,
 		Markdown: false,
-	}
-
-	assert.Equal(t, e, a)
-}
-
-func TestFormatCryptoAsMarkdownTable(t *testing.T) {
-	a, err := commands.FormatCryptoAsMarkdownTable(&cmc.GetLatestQuoteResponse{
-		Data: []cmc.Cryptocurrency{
-			cryptoBTC,
-			cryptoETH,
-			cryptoDOGE,
-		},
-		Error: "",
-	})
-	require.NoError(t, err)
-
-	e := &commands.Output{
-		Response: "```" + `
-+-----------------+------------+--------+---------+----------+
-|                 |      PRICE |     1H |     24H |       7D |
-+-----------------+------------+--------+---------+----------+
-| Bitcoin (BTC)   | $57,200.27 | -0.04% |  +6.75% |   +4.49% |
-| Ethereum (ETH)  |  $3,519.28 | +0.59% |  +8.37% |  +28.55% |
-| Dogecoin (DOGE) |    $0.6480 | +1.46% | +19.33% | +102.52% |
-+-----------------+------------+--------+---------+----------+
-` + "```",
-		Markdown: true,
 	}
 
 	assert.Equal(t, e, a)
