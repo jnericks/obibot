@@ -9,17 +9,17 @@ import (
 )
 
 type (
-	GetLatestQuoteParams struct {
-		Symbols []string
+	GetCryptocurrencyQuotesParams struct {
+		Symbols []string `validate:"required"`
 	}
 
-	GetLatestQuoteResponse struct {
-		Data  []Cryptocurrency
-		Error string
+	GetCryptocurrencyQuotesResponse struct {
+		Quotes []CryptocurrencyQuote
+		Error  string
 	}
 )
 
-func (c *client) GetLatestQuote(ctx context.Context, params GetLatestQuoteParams) (*GetLatestQuoteResponse, error) {
+func (c *client) GetCryptocurrencyQuotes(ctx context.Context, params GetCryptocurrencyQuotesParams) (*GetCryptocurrencyQuotesResponse, error) {
 	if err := c.validate.Struct(params); err != nil {
 		return nil, fmt.Errorf("validating get crypto quote params: %w", err)
 	}
@@ -48,33 +48,41 @@ func (c *client) GetLatestQuote(ctx context.Context, params GetLatestQuoteParams
 			errMsg = fmt.Sprintf("error retrieving crypto data for %v", params.Symbols)
 		}
 
-		return &GetLatestQuoteResponse{
-			Data:  nil,
-			Error: errMsg,
+		return &GetCryptocurrencyQuotesResponse{
+			Quotes: nil,
+			Error:  errMsg,
 		}, nil
 
 	case http.StatusOK:
 		var data struct {
-			Data map[string]Cryptocurrency `json:"data"`
+			Data map[string]CryptocurrencyQuote `json:"data"`
 		}
 		if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 			return nil, fmt.Errorf("decoding cmc get latest quote response: %w", err)
 		}
 
-		cryptos := make([]Cryptocurrency, 0, len(data.Data))
+		cryptos := make([]CryptocurrencyQuote, 0, len(data.Data))
 		for _, c := range data.Data {
 			cryptos = append(cryptos, c)
 		}
+		if len(cryptos) == 0 {
+			return &GetCryptocurrencyQuotesResponse{
+				Quotes: nil,
+				Error:  fmt.Sprintf("no crypto quotes found for any of %v", params.Symbols),
+			}, nil
+		}
 
+		// sort by percent change desc
 		sort.Slice(cryptos, func(i, j int) bool {
-			return cryptos[i].Rank < cryptos[j].Rank
+			return cryptos[i].Quote.USD.PercentChange24H > cryptos[j].Quote.USD.PercentChange24H
 		})
-		return &GetLatestQuoteResponse{
-			Data:  cryptos,
-			Error: "",
+
+		return &GetCryptocurrencyQuotesResponse{
+			Quotes: cryptos,
+			Error:  "",
 		}, nil
 
-	default:
+	default: // unknown error
 		return nil, fmt.Errorf("cmc get latest quote response (%d %s)", resp.StatusCode, http.StatusText(resp.StatusCode))
 	}
 }

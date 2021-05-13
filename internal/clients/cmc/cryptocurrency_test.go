@@ -22,7 +22,7 @@ func TestCryptocurrency(t *testing.T) {
 	const apiKey = "fake-apiKey"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(t, r.URL.Path, "/cryptocurrency/quotes/latest")
+		assert.Equal(t, "/cryptocurrency/quotes/latest", r.URL.Path)
 		assert.Equal(t, apiKey, r.Header.Get("X-CMC_PRO_API_KEY"))
 
 		_, err := w.Write(cryptocurrencyQuotesLatest)
@@ -32,12 +32,12 @@ func TestCryptocurrency(t *testing.T) {
 	client, err := cmc.NewClient(http.DefaultClient, server.URL, apiKey)
 	require.NoError(t, err)
 
-	resp, err := client.GetLatestQuote(context.Background(), cmc.GetLatestQuoteParams{
+	resp, err := client.GetCryptocurrencyQuotes(context.Background(), cmc.GetCryptocurrencyQuotesParams{
 		Symbols: []string{"BTC", "ETH", "DOGE"},
 	})
 	require.NoError(t, err)
 
-	assert.Len(t, resp.Data, 3)
+	assert.Len(t, resp.Quotes, 3)
 	assert.Empty(t, resp.Error)
 }
 
@@ -56,11 +56,11 @@ func TestCryptocurrencyBadRequest(t *testing.T) {
 	client, err := cmc.NewClient(http.DefaultClient, server.URL, apiKey)
 	require.NoError(t, err)
 
-	resp, err := client.GetLatestQuote(context.Background(), cmc.GetLatestQuoteParams{
+	resp, err := client.GetCryptocurrencyQuotes(context.Background(), cmc.GetCryptocurrencyQuotesParams{
 		Symbols: []string{"BTC", "YOOO"},
 	})
 	require.NoError(t, err)
 
-	assert.Empty(t, resp.Data)
+	assert.Empty(t, resp.Quotes)
 	assert.Equal(t, `Invalid value for "symbol": "YOOO"`, resp.Error)
 }

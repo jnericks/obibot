@@ -2,9 +2,11 @@ package iex
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/go-playground/validator"
 )
@@ -18,7 +20,7 @@ func (e ErrInvalidSymbol) Error() string {
 }
 
 type Client interface {
-	GetStock(context.Context, GetStockParams) (*GetStockResponse, error)
+	GetStockQuotes(context.Context, GetStockQuotesParams) (*GetStockQuotesResponse, error)
 }
 
 type client struct {
@@ -28,13 +30,18 @@ type client struct {
 	http     *http.Client
 }
 
-func (c *client) newRequest(ctx context.Context, method, url string) (*http.Request, error) {
-	req, err := http.NewRequest(method, url, nil)
+func (c *client) newStockMarketBatchRequest(ctx context.Context, symbols []string) (*http.Request, error) {
+	if len(symbols) == 0 {
+		return nil, errors.New("no symbols")
+	}
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/stock/market/batch", c.baseURL), nil)
 	if err != nil {
 		return nil, err
 	}
 	q := req.URL.Query()
 	q.Set("token", c.apiToken)
+	q.Set("types", "quote")
+	q.Set("symbols", strings.Replace(strings.Join(symbols, ","), " ", "", -1))
 	req.URL.RawQuery = q.Encode()
 	return req.WithContext(ctx), nil
 }

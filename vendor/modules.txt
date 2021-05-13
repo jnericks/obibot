@@ -1,8 +1,5 @@
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
-# github.com/dustin/go-humanize v1.0.0
-## explicit
-github.com/dustin/go-humanize
 # github.com/go-playground/locales v0.13.0
 github.com/go-playground/locales
 github.com/go-playground/locales/currency
@@ -18,17 +15,8 @@ github.com/google/uuid
 # github.com/leodido/go-urn v1.2.1
 ## explicit
 github.com/leodido/go-urn
-# github.com/mattn/go-runewidth v0.0.12
-## explicit
-github.com/mattn/go-runewidth
-# github.com/olekukonko/tablewriter v0.0.5
-## explicit
-github.com/olekukonko/tablewriter
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
-# github.com/rivo/uniseg v0.2.0
-## explicit
-github.com/rivo/uniseg
 # github.com/sirupsen/logrus v1.8.1
 ## explicit
 github.com/sirupsen/logrus

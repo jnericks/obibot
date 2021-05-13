@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	cryptoBTC = cmc.Cryptocurrency{
+	cryptoBTC = cmc.CryptocurrencyQuote{
 		Name:   "Bitcoin",
 		Symbol: "BTC",
 		Rank:   1,
@@ -28,7 +28,7 @@ var (
 			},
 		},
 	}
-	cryptoETH = cmc.Cryptocurrency{
+	cryptoETH = cmc.CryptocurrencyQuote{
 		Name:   "Ethereum",
 		Symbol: "ETH",
 		Rank:   2,
@@ -46,7 +46,7 @@ var (
 			},
 		},
 	}
-	cryptoDOGE = cmc.Cryptocurrency{
+	cryptoDOGE = cmc.CryptocurrencyQuote{
 		Name:   "Dogecoin",
 		Symbol: "DOGE",
 		Rank:   4,
@@ -66,9 +66,9 @@ var (
 	}
 )
 
-func TestFormatCryptoAsFlat(t *testing.T) {
-	a, err := commands.FormatCryptoAsFlat(&cmc.GetLatestQuoteResponse{
-		Data: []cmc.Cryptocurrency{
+func TestFormatGetCryptocurrencyQuotesResponse(t *testing.T) {
+	a, err := commands.FormatGetCryptocurrencyQuotesResponse(&cmc.GetCryptocurrencyQuotesResponse{
+		Quotes: []cmc.CryptocurrencyQuote{
 			cryptoBTC,
 			cryptoETH,
 			cryptoDOGE,
@@ -78,9 +78,9 @@ func TestFormatCryptoAsFlat(t *testing.T) {
 	require.NoError(t, err)
 
 	e := &commands.Output{
-		Response: `BTC: $57,200.27 +$7,385.28 (+6.75%)
-ETH: $3,519.28 +$375.66 (+8.37%)
-DOGE: $0.6480 +$0.0319 (+19.33%)`,
+		Response: `BTC: 57200.27 +7385.28 (+6.75%)
+ETH: 3519.28 +375.66 (+8.37%)
+DOGE: 0.6480 +0.0319 (+19.33%)`,
 		Markdown: false,
 	}
 

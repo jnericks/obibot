@@ -11,7 +11,7 @@ import (
 )
 
 type Client interface {
-	GetLatestQuote(context.Context, GetLatestQuoteParams) (*GetLatestQuoteResponse, error)
+	GetCryptocurrencyQuotes(context.Context, GetCryptocurrencyQuotesParams) (*GetCryptocurrencyQuotesResponse, error)
 }
 
 type client struct {
