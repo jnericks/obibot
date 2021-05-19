@@ -1,3 +1,5 @@
+# github.com/cockroachdb/apd v1.1.0
+github.com/cockroachdb/apd
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
 # github.com/go-playground/locales v0.13.0
@@ -12,11 +14,18 @@ github.com/go-playground/validator
 # github.com/google/uuid v1.2.0
 ## explicit
 github.com/google/uuid
+# github.com/leekchan/accounting v0.3.1
+## explicit
+github.com/leekchan/accounting
 # github.com/leodido/go-urn v1.2.1
 ## explicit
 github.com/leodido/go-urn
+# github.com/pkg/errors v0.8.1
+github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
+# github.com/shopspring/decimal v0.0.0-20180709203117-cd690d0c9e24
+github.com/shopspring/decimal
 # github.com/sirupsen/logrus v1.8.1
 ## explicit
 github.com/sirupsen/logrus

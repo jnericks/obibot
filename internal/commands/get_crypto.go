@@ -4,9 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"strings"
 
 	"github.com/jnericks/obibot/internal/clients/cmc"
+	"github.com/leekchan/accounting"
 )
 
 func GetCrypto(cmcClient cmc.Client, formatter func(*cmc.GetCryptocurrencyQuotesResponse) (*Output, error)) Func {
@@ -53,21 +55,30 @@ func FormatGetCryptocurrencyQuotesResponse(resp *cmc.GetCryptocurrencyQuotesResp
 		}
 
 		price := c.Quote.USD.Price
-		changePercent := c.Quote.USD.PercentChange24H
-		change := price / (1 + changePercent)
-		priceFormat := "%.2f"
-		changeFormat := "%+.2f"
-		changePercentFormat := "%+.2f%%"
-		if -10 < price && price < 10 {
-			priceFormat = "%.4f"
-			changeFormat = "+%.4f"
+		percent := c.Quote.USD.PercentChange24H
+		change := price / (1 + percent)
+
+		lc := accounting.LocaleInfo["USD"]
+		ac := accounting.Accounting{
+			Symbol:    lc.ComSymbol,
+			Precision: 2,
+			Thousand:  lc.ThouSep,
+			Decimal:   lc.DecSep,
+		}
+		if math.Abs(price) < 2 {
+			ac.Precision = 4
 		}
 
-		sb.WriteString(fmt.Sprintf("%s: %s %s (%s)",
+		changePrefix := "+"
+		if change < 0 {
+			changePrefix = ""
+		}
+
+		sb.WriteString(fmt.Sprintf("%s: %s %s (%s%%)",
 			c.Symbol,
-			fmt.Sprintf(priceFormat, price),
-			fmt.Sprintf(changeFormat, change),
-			fmt.Sprintf(changePercentFormat, changePercent),
+			ac.FormatMoney(price),
+			changePrefix+ac.FormatMoney(change),
+			fmt.Sprintf("%+.2f", percent),
 		))
 	}
 

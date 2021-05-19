@@ -4,9 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"strings"
 
 	"github.com/jnericks/obibot/internal/clients/iex"
+	"github.com/leekchan/accounting"
 )
 
 func GetStock(iexClient iex.Client, formatter func(*iex.GetStockQuotesResponse) (*Output, error)) Func {
@@ -52,19 +54,31 @@ func FormatGetStockQuotesResponse(resp *iex.GetStockQuotesResponse) (*Output, er
 			sb.WriteByte('\n')
 		}
 
-		priceFormat := "%.2f"
-		changeFormat := "%+.2f"
-		changePercentFormat := "%+.2f%%"
-		if -10 < s.LatestPrice && s.LatestPrice < 10 {
-			priceFormat = "%.4f"
-			changeFormat = "+%.4f"
+		price := s.LatestPrice
+		percent := s.ChangePercent
+		change := s.Change
+
+		lc := accounting.LocaleInfo["USD"]
+		ac := accounting.Accounting{
+			Symbol:    lc.ComSymbol,
+			Precision: 2,
+			Thousand:  lc.ThouSep,
+			Decimal:   lc.DecSep,
+		}
+		if math.Abs(price) < 2 {
+			ac.Precision = 4
 		}
 
-		sb.WriteString(fmt.Sprintf("%s: %s %s (%s)",
+		changePrefix := "+"
+		if change < 0 {
+			changePrefix = ""
+		}
+
+		sb.WriteString(fmt.Sprintf("%s: %s %s (%s%%)",
 			s.Symbol,
-			fmt.Sprintf(priceFormat, s.LatestPrice),
-			fmt.Sprintf(changeFormat, s.Change),
-			fmt.Sprintf(changePercentFormat, s.ChangePercent),
+			ac.FormatMoney(price),
+			changePrefix+ac.FormatMoney(change),
+			fmt.Sprintf("%+.2f", percent),
 		))
 	}
 

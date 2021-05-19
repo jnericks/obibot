@@ -51,9 +51,9 @@ func TestFormatGetStockQuotesResponse(t *testing.T) {
 	require.NoError(t, err)
 
 	e := &commands.Output{
-		Response: `TSLA: 600.36 -16.84 (-0.03%)
-AMZN: 3140.68 -83.23 (-0.03%)
-SQ: 208.79 -11.86 (-0.05%)`,
+		Response: `TSLA: $600.36 -$16.84 (-0.03%)
+AMZN: $3,140.68 -$83.23 (-0.03%)
+SQ: $208.79 -$11.86 (-0.05%)`,
 		Markdown: false,
 	}
 
