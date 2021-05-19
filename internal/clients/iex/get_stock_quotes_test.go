@@ -209,4 +209,22 @@ func TestGetStockQuotes(t *testing.T) {
 		assert.Empty(t, resp.Quotes)
 		assert.Equal(t, "no quotes found for any of [abc xyz]", resp.Error)
 	})
+
+	t.Run("symbol=game", func(t *testing.T) {
+		cfg := testConfig{
+			apiToken:   "apiToken-game",
+			statusCode: http.StatusOK,
+			fileSuffix: "game",
+			params: iex.GetStockQuotesParams{
+				Symbols: []string{
+					"game",
+				},
+			},
+		}
+		resp, err := getStockQuotes(t, cfg)
+		require.NoError(t, err)
+
+		assert.Empty(t, resp.Quotes)
+		assert.Equal(t, "no quotes found for any of [game]", resp.Error)
+	})
 }

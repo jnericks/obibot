@@ -74,7 +74,7 @@ func (c *client) GetStockQuotes(ctx context.Context, params GetStockQuotesParams
 
 	case http.StatusOK:
 		var data map[string]struct {
-			Quote StockQuote `json:"quote"`
+			Quote *StockQuote `json:"quote"`
 		}
 		if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 			return nil, fmt.Errorf("decoding iex get stock market batch response: %w", err)
@@ -82,12 +82,15 @@ func (c *client) GetStockQuotes(ctx context.Context, params GetStockQuotesParams
 
 		stocks := make([]StockQuote, 0, len(data))
 		for _, q := range data {
-			stocks = append(stocks, q.Quote)
+			if q.Quote == nil {
+				continue
+			}
+			stocks = append(stocks, *q.Quote)
 		}
 		if len(stocks) == 0 {
 			return &GetStockQuotesResponse{
 				Quotes: nil,
-				Error:  fmt.Sprintf("no stock quotes found for any of %v", params.Symbols),
+				Error:  fmt.Sprintf("no quotes found for any of %v", params.Symbols),
 			}, nil
 		}
 
