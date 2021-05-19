@@ -17,18 +17,18 @@ var defaultCryptoSymbols = []string{
 
 func GetCrypto(cmcClient cmc.Client, formatter func(*cmc.GetCryptocurrencyQuotesResponse) (*Output, error)) Func {
 	return func(ctx context.Context, input Input) (*Output, error) {
-		args := input.Args
-		if len(args) == 0 {
-			args = defaultCryptoSymbols
+		var symbols []string
+		for _, arg := range input.Args {
+			for _, s := range strings.Split(strings.Replace(arg, " ", "", -1), ",") {
+				if s == "" {
+					continue
+				}
+				symbols = append(symbols, strings.ToUpper(s))
+			}
 		}
 
-		symbols := make([]string, 0, len(args))
-		for _, a := range symbols {
-			a = strings.ToUpper(strings.Replace(a, " ", "", -1))
-			if a == "" {
-				continue
-			}
-			symbols = append(symbols, strings.Split(a, ",")...)
+		if len(symbols) == 0 {
+			symbols = defaultCryptoSymbols
 		}
 
 		resp, err := cmcClient.GetCryptocurrencyQuotes(ctx, cmc.GetCryptocurrencyQuotesParams{

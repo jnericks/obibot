@@ -17,18 +17,18 @@ var defaultStockSymbols = []string{
 
 func GetStock(iexClient iex.Client, formatter func(*iex.GetStockQuotesResponse) (*Output, error)) Func {
 	return func(ctx context.Context, input Input) (*Output, error) {
-		args := input.Args
-		if len(args) == 0 {
-			args = defaultStockSymbols
+		var symbols []string
+		for _, arg := range input.Args {
+			for _, s := range strings.Split(strings.Replace(arg, " ", "", -1), ",") {
+				if s == "" {
+					continue
+				}
+				symbols = append(symbols, strings.ToUpper(s))
+			}
 		}
 
-		symbols := make([]string, 0, len(input.Args))
-		for _, a := range input.Args {
-			a = strings.ToUpper(strings.Replace(a, " ", "", -1))
-			if a == "" {
-				continue
-			}
-			symbols = append(symbols, strings.Split(a, ",")...)
+		if len(symbols) == 0 {
+			symbols = defaultStockSymbols
 		}
 
 		resp, err := iexClient.GetStockQuotes(ctx, iex.GetStockQuotesParams{
