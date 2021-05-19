@@ -22,12 +22,15 @@ func (s *server) handleTelegram() http.HandlerFunc {
 		}
 
 		in := strings.Split(data.Message.Text, " ")
-		if len(in) < 2 {
+		if len(in) == 0 {
 			return
 		}
 
-		cmd := in[0]
-		cmdInput := commands.Input{Args: in[1:]}
+		cmd := strings.Trim(in[0], " ")
+		cmdInput := commands.Input{}
+		if len(in) > 1 {
+			cmdInput.Args = in[1:]
+		}
 		if !s.manager.CanExec(cmd) {
 			// do nothing since chat message is just regular text, not a command
 			return

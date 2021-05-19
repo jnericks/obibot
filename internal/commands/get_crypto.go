@@ -11,14 +11,19 @@ import (
 	"github.com/leekchan/accounting"
 )
 
+var defaultCryptoSymbols = []string{
+	"BTC", "ETH", "DOGE",
+}
+
 func GetCrypto(cmcClient cmc.Client, formatter func(*cmc.GetCryptocurrencyQuotesResponse) (*Output, error)) Func {
 	return func(ctx context.Context, input Input) (*Output, error) {
-		if len(input.Args) < 1 {
-			return nil, errors.New("expecting crypto symbol as input")
+		args := input.Args
+		if len(args) == 0 {
+			args = defaultCryptoSymbols
 		}
 
-		symbols := make([]string, 0, len(input.Args))
-		for _, a := range input.Args {
+		symbols := make([]string, 0, len(args))
+		for _, a := range symbols {
 			a = strings.ToUpper(strings.Replace(a, " ", "", -1))
 			if a == "" {
 				continue

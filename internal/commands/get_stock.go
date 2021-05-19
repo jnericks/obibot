@@ -11,10 +11,15 @@ import (
 	"github.com/leekchan/accounting"
 )
 
+var defaultStockSymbols = []string{
+	"SPY", "NDAQ", "VTI", "BND",
+}
+
 func GetStock(iexClient iex.Client, formatter func(*iex.GetStockQuotesResponse) (*Output, error)) Func {
 	return func(ctx context.Context, input Input) (*Output, error) {
-		if len(input.Args) < 1 {
-			return nil, errors.New("expecting stock symbol as input")
+		args := input.Args
+		if len(args) == 0 {
+			args = defaultStockSymbols
 		}
 
 		symbols := make([]string, 0, len(input.Args))
