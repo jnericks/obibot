@@ -61,7 +61,7 @@ func FormatGetCryptocurrencyQuotesResponse(resp *cmc.GetCryptocurrencyQuotesResp
 
 		price := c.Quote.USD.Price
 		percent := c.Quote.USD.PercentChange24H
-		change := price / (1 + percent)
+		change := price - (price / (1 + (percent / 100)))
 
 		lc := accounting.LocaleInfo["USD"]
 		ac := accounting.Accounting{

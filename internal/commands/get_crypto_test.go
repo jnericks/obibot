@@ -78,9 +78,9 @@ func TestFormatGetCryptocurrencyQuotesResponse(t *testing.T) {
 	require.NoError(t, err)
 
 	e := &commands.Output{
-		Response: `BTC: $57,200.27 +$7,385.28 (+6.75%)
-ETH: $3,519.28 +$375.66 (+8.37%)
-DOGE: $0.6480 +$0.0319 (+19.33%)`,
+		Response: `BTC: $57,200.27 +$3,614.46 (+6.75%)
+ETH: $3,519.28 +$271.76 (+8.37%)
+DOGE: $0.6480 +$0.1050 (+19.33%)`,
 		Markdown: false,
 	}
 
