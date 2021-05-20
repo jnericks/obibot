@@ -12,7 +12,7 @@ import (
 )
 
 var defaultStockSymbols = []string{
-	"SPY", "NDAQ", "VTI", "BND",
+	"SPY", "QQQ", "BND",
 }
 
 func GetStock(iexClient iex.Client, formatter func(*iex.GetStockQuotesResponse) (*Output, error)) Func {
