@@ -46,3 +46,11 @@ func WithField(ctx context.Context, key string, value interface{}) *log.Entry {
 func WithFields(ctx context.Context, fields log.Fields) *log.Entry {
 	return Init(ctx).WithFields(fields)
 }
+
+func Info(ctx context.Context, args ...interface{}) {
+	Init(ctx).Info(args...)
+}
+
+func Infof(ctx context.Context, format string, args ...interface{}) {
+	Init(ctx).Infof(format, args...)
+}
