@@ -60,9 +60,6 @@ func FormatGetStockQuotesResponse(resp *iex.GetStockQuotesResponse) (*Output, er
 		}
 
 		price := s.LatestPrice
-		percent := s.ChangePercent
-		change := s.Change
-
 		lc := accounting.LocaleInfo["USD"]
 		ac := accounting.Accounting{
 			Symbol:    lc.ComSymbol,
@@ -74,6 +71,7 @@ func FormatGetStockQuotesResponse(resp *iex.GetStockQuotesResponse) (*Output, er
 			ac.Precision = 4
 		}
 
+		change := s.Change
 		changePrefix := "+"
 		if change < 0 {
 			changePrefix = ""
@@ -83,7 +81,7 @@ func FormatGetStockQuotesResponse(resp *iex.GetStockQuotesResponse) (*Output, er
 			s.Symbol,
 			ac.FormatMoney(price),
 			changePrefix+ac.FormatMoney(change),
-			fmt.Sprintf("%+.2f", percent),
+			fmt.Sprintf("%+.2f", s.ChangePercent*100),
 		))
 	}
 
