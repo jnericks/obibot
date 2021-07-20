@@ -49,5 +49,7 @@ func run() error {
 	if err != nil {
 		return err
 	}
+
+	log.Init(log.ProcessContext).Info("starting up...")
 	return http.ListenAndServe(":8180", s)
 }

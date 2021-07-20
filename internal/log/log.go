@@ -9,7 +9,12 @@ import (
 
 type Fields = log.Fields
 
-var traceIDKey int
+var (
+	// ProcessContext is a context.Context used for background logging
+	ProcessContext = context.WithValue(context.Background(), &traceIDKey, "PROCESS")
+
+	traceIDKey int
+)
 
 func WithTraceID(ctx context.Context) context.Context {
 	return context.WithValue(ctx, &traceIDKey, uuid.New().String())
