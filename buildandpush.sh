@@ -1,0 +1,1 @@
+docker build -t jnericks/obibot:latest . && docker push jnericks/obibot:latest
