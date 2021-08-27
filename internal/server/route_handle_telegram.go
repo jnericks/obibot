@@ -64,6 +64,12 @@ func (s *server) handleTelegram() http.HandlerFunc {
 			s.respond(w, r, nil, http.StatusInternalServerError)
 			return
 		}
+		if err := s.telegram.DeleteMessage(ctx, telegram.DeleteMessageParams{
+			ChatID:    data.Message.Chat.ID,
+			MessageID: data.Message.MessageID,
+		}); err != nil {
+			log.WithError(ctx, err).Error("deleting telegram message")
+		}
 
 		w.WriteHeader(http.StatusOK)
 	}

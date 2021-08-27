@@ -14,6 +14,7 @@ import (
 
 type Client interface {
 	SendMessage(context.Context, SendMessageParams) error
+	DeleteMessage(context.Context, DeleteMessageParams) error
 }
 
 func NewClient(httpClient *http.Client, botToken string) (Client, error) {
